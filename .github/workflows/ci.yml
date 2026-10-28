@@ -34,5 +34,7 @@ jobs:
       - name: Build docs
         run: pnpm --filter react-zpl-docs build
       - name: Export example labels
+        # Runs the built CLI directly: pnpm only links the react-zpl command
+        # when packages/cli/dist exists at install time.
         working-directory: examples/shipping-label
-        run: pnpm exec react-zpl export --svg --out ${{ runner.temp }}/labels
+        run: node ../../packages/cli/dist/index.js export --svg --out ${{ runner.temp }}/labels
