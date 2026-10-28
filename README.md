@@ -6,9 +6,14 @@
 <div align="center">Build Zebra printer labels with React.<br />Components, flexbox and Tailwind classes that compile to ZPL.</div>
 <br />
 <div align="center">
-<a href="apps/docs">Docs</a>
+<a href="https://github.com/caddy-industries/react-zpl/actions/workflows/ci.yml"><img src="https://github.com/caddy-industries/react-zpl/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+<a href="https://www.npmjs.com/package/@caddy-industries/react-zpl"><img src="https://img.shields.io/npm/v/@caddy-industries/react-zpl" alt="npm" /></a>
+</div>
+<br />
+<div align="center">
+<a href="https://caddy-industries.github.io/react-zpl/">Docs</a>
 <span> · </span>
-<a href="apps/docs/catalog">Components</a>
+<a href="https://caddy-industries.github.io/react-zpl/components/">Components</a>
 <span> · </span>
 <a href="packages/react-zpl">Package</a>
 <span> · </span>
@@ -77,7 +82,7 @@ npx react-zpl dev
 | `<Image>` | PNG images, converted to 1-bit graphics |
 | `<Line>` / `<Divider>` | Horizontal and vertical rules |
 
-See the [component catalog](apps/docs) for 44 examples at common stock sizes.
+See the [component catalog](https://caddy-industries.github.io/react-zpl/components/) for 44 examples at common stock sizes.
 
 ## Support
 

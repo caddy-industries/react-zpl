@@ -8,10 +8,13 @@
     "typecheck": "pnpm -r typecheck",
     "changeset": "changeset",
     "docs:build": "pnpm --filter @caddy-industries/react-zpl build && pnpm --filter react-zpl-docs build",
-    "docs:preview": "pnpm --filter react-zpl-docs preview"
+    "docs:preview": "pnpm --filter react-zpl-docs preview",
+    "version-packages": "changeset version && pnpm install --lockfile-only",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.0",
     "typescript": "^5.9.0"
-  }
+  },
+  "packageManager": "pnpm@10.7.0"
 }
