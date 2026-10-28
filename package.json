@@ -10,7 +10,7 @@
     "docs:build": "pnpm --filter @caddy-industries/react-zpl build && pnpm --filter react-zpl-docs build",
     "docs:preview": "pnpm --filter react-zpl-docs preview",
     "version-packages": "changeset version && pnpm install --lockfile-only",
-    "release": "pnpm build && changeset publish"
+    "release": "pnpm build && node scripts/stage-release.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.0",

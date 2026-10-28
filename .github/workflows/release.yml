@@ -1,7 +1,10 @@
 name: Release
 
 # Uses changesets: merging PRs with changeset files opens a "Version packages"
-# PR; merging that PR publishes the new versions to npm.
+# PR. Merging that PR stages the new versions on npm (npm stage publish), and a
+# maintainer approves them with 2FA on npmjs.com under Staged Packages.
+#
+# NPM_TOKEN is a granular token with "Read and write (stage only)" access.
 
 on:
   push:
@@ -29,11 +32,13 @@ jobs:
           node-version: 22
           cache: pnpm
           registry-url: https://registry.npmjs.org
+      - name: Use npm 11 (npm stage needs 11.15 or later)
+        run: npm install -g npm@11
       - run: pnpm install --frozen-lockfile
       - name: Skip publishing until the NPM_TOKEN secret is set
         if: env.NPM_TOKEN == ''
         run: echo "::warning::NPM_TOKEN secret is not set, so nothing was published."
-      - name: Create release PR or publish
+      - name: Create release PR or stage new versions
         if: env.NPM_TOKEN != ''
         uses: changesets/action@v1
         with:
