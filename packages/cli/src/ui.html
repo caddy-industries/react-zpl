@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>react-zpl preview</title>
+<style>
+  :root {
+    --bg: #f4f4f2;
+    --panel: #ffffff;
+    --border: #e3e3df;
+    --text: #1c1c1a;
+    --muted: #6e6e68;
+    --hover: #ececea;
+    --active: #1c1c1a;
+    --active-text: #ffffff;
+    --accent: #e5484d;
+    --warn-bg: #fff7e0;
+    --warn-text: #7a5300;
+    --error-bg: #fff0f0;
+    --error-text: #a3161c;
+    --code-bg: #fafaf8;
+    --canvas: #e9e9e5;
+    --shadow: 0 1px 2px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.08);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151514;
+      --panel: #1c1c1b;
+      --border: #2e2e2c;
+      --text: #ececea;
+      --muted: #9a9a94;
+      --hover: #262625;
+      --active: #ececea;
+      --active-text: #151514;
+      --warn-bg: #2d2610;
+      --warn-text: #f1c75b;
+      --error-bg: #2e1516;
+      --error-text: #ff9592;
+      --code-bg: #181817;
+      --canvas: #0f0f0e;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.4);
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 13px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: grid;
+    grid-template-columns: 240px 1fr 400px;
+    grid-template-rows: 100vh;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  code, pre, .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+  /* Sidebar */
+  aside {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 16px; font-weight: 600; letter-spacing: -.01em;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand svg { flex: none; }
+  .live { margin-left: auto; display: flex; align-items: center; gap: 6px; font-weight: 400; color: var(--muted); font-size: 12px; }
+  .live i { width: 7px; height: 7px; border-radius: 50%; background: #30a46c; }
+  .live.off i { background: var(--muted); }
+  .search { padding: 10px 12px 6px; }
+  .search input {
+    width: 100%; padding: 6px 10px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg); outline: none;
+  }
+  .search input:focus { border-color: var(--muted); }
+  nav { overflow: auto; padding: 4px 8px 12px; flex: 1; }
+  nav a {
+    display: block; padding: 6px 10px; border-radius: 6px; color: inherit;
+    text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  nav a:hover { background: var(--hover); }
+  nav a[aria-current="true"] { background: var(--active); color: var(--active-text); }
+  nav .empty { color: var(--muted); padding: 8px 10px; }
+  nav details > summary {
+    list-style: none; cursor: pointer; padding: 6px 10px; border-radius: 6px; color: var(--muted);
+    display: flex; align-items: center; gap: 6px; user-select: none;
+  }
+  nav details > summary::-webkit-details-marker { display: none; }
+  nav details > summary::before { content: ""; width: 0; height: 0; border: 4px solid transparent; border-left-color: currentColor; transform-origin: 2px 4px; transition: transform .12s; margin-right: -2px; }
+  nav details[open] > summary::before { transform: rotate(90deg); }
+  nav details > summary:hover { background: var(--hover); color: var(--text); }
+  nav details > .children { margin-left: 12px; padding-left: 6px; border-left: 1px solid var(--border); }
+  nav a .dir { color: var(--muted); }
+  nav a[aria-current="true"] .dir { color: inherit; opacity: .7; }
+
+  /* Main */
+  main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .titlebar {
+    display: flex; align-items: center; gap: 10px; min-height: 45px;
+    padding: 8px 16px; border-bottom: 1px solid var(--border); background: var(--panel);
+  }
+  .toolbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 8px 16px; border-bottom: 1px solid var(--border); background: var(--panel);
+  }
+  .chip { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--hover); color: var(--muted); }
+  .chip.accent { background: var(--warn-bg); color: var(--warn-text); }
+  .select {
+    padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg);
+    max-width: 180px; font-size: 12px; outline: none;
+  }
+  .title { font-weight: 600; }
+  .meta { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .spacer { flex: 1; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 7px; padding: 2px; gap: 2px; }
+  .seg button {
+    border: 0; background: none; padding: 3px 8px; border-radius: 5px; cursor: pointer; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .seg button:hover { color: var(--text); }
+  .seg button[aria-pressed="true"] { background: var(--hover); color: var(--text); }
+  .toggle { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); cursor: pointer; user-select: none; }
+  .toggle input { accent-color: var(--accent); margin: 0; }
+  .margin-input {
+    width: 64px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg); outline: none; font-size: 12px;
+  }
+  .margin-input:focus { border-color: var(--muted); }
+  .canvas {
+    flex: 1; overflow: auto; background: var(--canvas);
+    display: grid; place-items: center; padding: 32px; min-height: 0;
+  }
+  .paper { position: relative; background: #fff; box-shadow: var(--shadow); border-radius: 3px; overflow: hidden; line-height: 0; }
+  .paper svg { display: block; width: 100%; height: 100%; }
+  .paper .overlay { position: absolute; inset: 0; pointer-events: none; }
+  .error {
+    max-width: 720px; width: 100%; background: var(--error-bg); color: var(--error-text);
+    border-radius: 8px; padding: 16px 18px; line-height: 1.5;
+  }
+  .error strong { display: block; margin-bottom: 6px; }
+  .error pre { margin: 10px 0 0; white-space: pre-wrap; font-size: 12px; opacity: .85; }
+  .placeholder { color: var(--muted); text-align: center; line-height: 1.6; }
+  .placeholder code { background: var(--panel); padding: 1px 5px; border-radius: 4px; }
+
+  /* Right panel */
+  section.side {
+    background: var(--panel); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; min-height: 0;
+  }
+  .side header { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .side header .label { font-weight: 600; margin-right: auto; padding-left: 4px; }
+  .btn {
+    border: 1px solid var(--border); background: var(--panel); border-radius: 6px;
+    padding: 4px 10px; cursor: pointer; transition: background .12s;
+  }
+  .btn:hover { background: var(--hover); }
+  .btn:active { transform: translateY(.5px); }
+  .btn.primary { background: var(--active); color: var(--active-text); border-color: var(--active); }
+  .infobar { padding: 8px 14px; background: var(--code-bg); color: var(--muted); border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .infobar code { color: var(--text); }
+  .infobar .err { color: var(--error-text); }
+  .tabs button .count { display: inline-block; min-width: 16px; padding: 0 4px; margin-left: 4px; border-radius: 999px; background: var(--warn-bg); color: var(--warn-text); font-size: 11px; line-height: 16px; text-align: center; }
+  .pane { flex: 1; min-height: 0; overflow: auto; }
+  textarea.props {
+    width: 100%; height: 100%; border: 0; resize: none; outline: none; display: block;
+    padding: 12px 14px; background: var(--code-bg); font: 12px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace; tab-size: 2;
+  }
+  .checks { list-style: none; margin: 0; padding: 8px 0; }
+  .checks li { display: flex; gap: 10px; padding: 8px 14px; line-height: 1.45; }
+  .checks li + li { border-top: 1px solid var(--border); }
+  .checks .icon { flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; margin-top: 1px; }
+  .checks .warn .icon { background: var(--warn-bg); color: var(--warn-text); }
+  .checks .ok .icon { background: #e6f6ec; color: #18794e; }
+  .checks .info .icon { background: var(--hover); color: var(--muted); }
+  @media (prefers-color-scheme: dark) { .checks .ok .icon { background: #132d21; color: #4cc38a; } }
+  .checks small { display: block; color: var(--muted); }
+  .zpl .p { background: var(--warn-bg); color: var(--warn-text); border-radius: 3px; }
+  pre.zpl {
+    margin: 0; flex: 1; min-height: 0; overflow: auto; padding: 12px 14px; background: var(--code-bg);
+    font-size: 12px; line-height: 1.6; white-space: pre; tab-size: 2;
+  }
+  .tabs { margin-right: 4px; }
+  .zpl .c { color: #0b6bcb; font-weight: 600; }
+  .zpl .k { color: #a626a4; }
+  .zpl .s { color: #1a7f37; }
+  .zpl .t { color: #0b6bcb; }
+  .zpl .a { color: #b35900; }
+  .zpl .n { color: #986801; }
+  .zpl .m { color: var(--muted); font-style: italic; }
+  @media (prefers-color-scheme: dark) {
+    .zpl .k { color: #d7a0ff; } .zpl .s { color: #7ee2a8; } .zpl .t { color: #7cb7ff; }
+    .zpl .a { color: #ffb86b; } .zpl .n { color: #f1c75b; }
+  }
+  .zpl .d { color: #1a7f37; }
+  @media (prefers-color-scheme: dark) { .zpl .c { color: #7cb7ff; } .zpl .d { color: #7ee2a8; } }
+  .size-note { color: var(--muted); padding: 8px 14px; border-top: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+
+  dialog {
+    border: 1px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--text);
+    padding: 18px; width: 340px; box-shadow: var(--shadow);
+  }
+  dialog::backdrop { background: rgba(0,0,0,.3); }
+  dialog h2 { margin: 0 0 4px; font-size: 15px; }
+  dialog p { margin: 0 0 14px; color: var(--muted); }
+  dialog label { display: block; margin-bottom: 10px; color: var(--muted); }
+  dialog input { display: block; width: 100%; margin-top: 4px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
+  dialog .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  dialog .status { min-height: 1.4em; margin: 4px 0 0; }
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(8px);
+    background: var(--active); color: var(--active-text); padding: 7px 14px; border-radius: 8px;
+    opacity: 0; transition: opacity .15s, transform .15s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 1000px) {
+    body { grid-template-columns: 200px 1fr; grid-template-rows: 100vh; }
+    section.side { display: none; }
+  }
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="1" y="1" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 5v8M7.5 5v8M9 5v8M12 5v8M13.5 5v8" stroke="currentColor" stroke-width="1.2"/></svg>
+    react-zpl
+    <span class="live off" id="live" title="Reloads when files change"><i></i><span>Live</span></span>
+  </div>
+  <div class="search"><input id="filter" placeholder="Filter labels" autocomplete="off" spellcheck="false"></div>
+  <nav id="list"></nav>
+</aside>
+
+<main>
+  <div class="titlebar">
+    <span class="title" id="title">No label selected</span>
+    <span class="chip" id="mode" hidden></span>
+    <span class="meta" id="meta"></span>
+    <span class="spacer"></span>
+    <button class="btn primary" id="print">Print…</button>
+  </div>
+  <div class="toolbar">
+    <label class="toggle" id="variantWrap" title="Which sample data to render with">Data
+      <select id="variant" class="select"></select>
+    </label>
+    <label class="toggle" title="Show {{placeholders}} in place of text props, and export the ZPL as a template"><input type="checkbox" id="template"> Template</label>
+    <span class="seg" id="dpi" style="margin-left:auto" role="group" aria-label="Printer resolution">
+      <button data-v="" aria-pressed="true" title="Use the label's dpi">Label</button>
+      <button data-v="203">203</button>
+      <button data-v="300">300</button>
+      <button data-v="600">600</button>
+    </span>
+    <span class="seg" id="zoom" role="group" aria-label="Zoom">
+      <button data-v="fit" aria-pressed="true">Fit</button>
+      <button data-v="1" title="Physical size on a 96 dpi screen">1×</button>
+      <button data-v="2">2×</button>
+    </span>
+    <label class="toggle" title="Printer margin, e.g. 1.5mm or 1mm 2mm">Margin <input id="margin" class="margin-input mono" placeholder="label" spellcheck="false" autocomplete="off"></label>
+    <label class="toggle"><input type="checkbox" id="boxes"> Boxes</label>
+  </div>
+  <div class="canvas" id="canvas">
+    <div class="placeholder" id="placeholder">Loading…</div>
+  </div>
+</main>
+
+<section class="side">
+  <header>
+    <span class="seg tabs" id="tabs" role="tablist">
+      <button data-v="react" role="tab">React</button>
+      <button data-v="props" role="tab" title="Sample data passed to the label">Props</button>
+      <button data-v="zpl" role="tab">ZPL</button>
+      <button data-v="checks" role="tab">Checks<span class="count" id="checkCount" hidden></span></button>
+    </span>
+    <span class="spacer"></span>
+    <button class="btn" id="copy">Copy</button>
+    <button class="btn" id="download" title="Download">Download</button>
+  </header>
+  <div class="infobar" id="info" hidden></div>
+  <pre class="zpl" id="source" data-tab="react"></pre>
+  <div class="pane" data-tab="props" hidden><textarea class="props" id="props" spellcheck="false" autocomplete="off" aria-label="Preview props (JSON)"></textarea></div>
+  <pre class="zpl" id="zpl" data-tab="zpl" hidden></pre>
+  <div class="pane" data-tab="checks" hidden><ul class="checks" id="checks"></ul></div>
+  <div class="size-note" id="bytes"></div>
+</section>
+
+<dialog id="printDialog">
+  <form method="dialog" id="printForm">
+    <h2>Send to printer</h2>
+    <p>Sends the ZPL over the network to port 9100 on the printer.</p>
+    <label>Printer address<input id="printerHost" placeholder="192.168.1.50" required></label>
+    <label>Port<input id="printerPort" value="9100" inputmode="numeric"></label>
+    <div class="status" id="printStatus"></div>
+    <div class="row">
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" id="sendPrint" value="send">Send</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k, d) { try { return localStorage.getItem('react-zpl:' + k) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('react-zpl:' + k, v); } catch {} },
+  del(k) { try { localStorage.removeItem('react-zpl:' + k); } catch {} },
+};
+const state = {
+  labels: [], current: null, result: null, source: '',
+  tab: store.get('tab', 'react'), margin: store.get('margin', ''), dpi: store.get('dpi', ''),
+  zoom: store.get('zoom', 'fit'), boxes: store.get('boxes', '0') === '1',
+  template: store.get('template', '0') === '1',
+  propsError: '',
+};
+const TABS = ['react', 'props', 'zpl', 'checks'];
+if (!TABS.includes(state.tab)) state.tab = 'react';
+
+/* ---------- per-label sample data ---------- */
+const variantKey = () => 'variant:' + state.current;
+const currentVariant = () => store.get(variantKey(), '');
+const editsKey = () => `props:${state.current}:${currentVariant()}`;
+function editedProps() {
+  const raw = store.get(editsKey(), null);
+  if (raw == null) return undefined;
+  try { return JSON.parse(raw); } catch { return undefined; }
+}
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+function setSeg(el, value) {
+  for (const b of el.querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.v === value));
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+/* ---------- sidebar: folder tree ---------- */
+function labelLink(l, text) {
+  return `<a href="#${encodeURIComponent(l.id)}" aria-current="${l.id === state.current}" title="${escapeHtml(l.id)}">${text}</a>`;
+}
+
+function renderList() {
+  const q = $('filter').value.trim().toLowerCase();
+  const nav = $('list');
+  if (!state.labels.length) {
+    nav.innerHTML = '<div class="empty">No labels found</div>';
+    return;
+  }
+  if (q) {
+    // Flat list of matches with their folder shown.
+    const items = state.labels.filter((l) => l.name.toLowerCase().includes(q));
+    nav.innerHTML = items.length
+      ? items.map((l) => {
+          const i = l.name.lastIndexOf('/');
+          return labelLink(l, i < 0 ? escapeHtml(l.name) : `<span class="dir">${escapeHtml(l.name.slice(0, i + 1))}</span>${escapeHtml(l.name.slice(i + 1))}`);
+        }).join('')
+      : '<div class="empty">No matches</div>';
+    return;
+  }
+  const root = { dirs: new Map(), files: [] };
+  for (const l of state.labels) {
+    const parts = l.name.split('/');
+    let node = root;
+    for (const dir of parts.slice(0, -1)) {
+      if (!node.dirs.has(dir)) node.dirs.set(dir, { dirs: new Map(), files: [] });
+      node = node.dirs.get(dir);
+    }
+    node.files.push(l);
+  }
+  const html = (node, path) =>
+    [...node.dirs].map(([name, child]) => {
+      const p = path + name + '/';
+      const open = store.get('folder:' + p, '1') === '1' || (state.current || '').startsWith(p);
+      return `<details data-path="${escapeHtml(p)}"${open ? ' open' : ''}><summary>${escapeHtml(name)}</summary><div class="children">${html(child, p)}</div></details>`;
+    }).join('') + node.files.map((l) => labelLink(l, escapeHtml(l.name.split('/').pop()))).join('');
+  nav.innerHTML = html(root, '');
+}
+$('list').addEventListener('toggle', (e) => {
+  const d = e.target;
+  if (d.tagName === 'DETAILS') store.set('folder:' + d.dataset.path, d.open ? '1' : '0');
+}, true);
+
+/* ---------- highlighting ---------- */
+function highlight(zpl) {
+  return escapeHtml(zpl)
+    .replace(/([\^~][A-Z0-9@]{1,2})([^\^~\n]*)/g, (_, c, rest) => {
+      if (c === '^FD') return `<span class="c">${c}</span><span class="d">${rest}</span>`;
+      return `<span class="c">${c}</span>${rest}`;
+    })
+    .replace(/\{\{[^{}<]*\}\}/g, (m) => `<span class="p">${m}</span>`);
+}
+
+const KEYWORDS = new Set('import export default from function return const let var if else for of in while new type interface extends satisfies as async await true false null undefined typeof class'.split(' '));
+
+/** A small TSX highlighter: comments, strings, keywords, JSX tags and props. */
+function highlightTsx(src) {
+  const re = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|('(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"|`(?:\\.|[^`\\])*`)|(<\/?)([A-Za-z][\w.]*)|\b([A-Za-z_$][\w$]*)(?==(?:["'{]))|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_$][\w$]*)\b/g;
+  let out = '';
+  let last = 0;
+  for (const m of src.matchAll(re)) {
+    out += escapeHtml(src.slice(last, m.index));
+    last = m.index + m[0].length;
+    if (m[1]) out += `<span class="m">${escapeHtml(m[1])}</span>`;
+    else if (m[2]) out += `<span class="s">${escapeHtml(m[2])}</span>`;
+    else if (m[4]) out += `${escapeHtml(m[3])}<span class="t">${escapeHtml(m[4])}</span>`;
+    else if (m[5]) out += `<span class="a">${m[5]}</span>`;
+    else if (m[6]) out += `<span class="n">${m[6]}</span>`;
+    else if (m[7]) out += KEYWORDS.has(m[7]) ? `<span class="k">${m[7]}</span>` : m[7];
+  }
+  return out + escapeHtml(src.slice(last));
+}
+
+/* ---------- right panel ---------- */
+function baseName() {
+  return (state.current || 'label').split('/').pop().replace(/\.(t|j)sx$/, '');
+}
+
+/** What Copy and Download act on for the open tab. */
+function tabContent() {
+  const res = state.result;
+  switch (state.tab) {
+    case 'react': return state.source && { text: state.source, file: baseName() + '.tsx', what: 'React source' };
+    case 'props': return $('props').value && { text: $('props').value, file: baseName() + '.props.json', what: 'Props' };
+    case 'zpl': return res && { text: res.zpl, file: baseName() + (res.template ? '.template.zpl' : '.zpl'), what: res.template ? 'ZPL template' : 'ZPL' };
+    case 'checks': return checksList().length && { text: checksList().map((c) => `${c.kind === 'warn' ? '!' : '-'} ${c.text}`).join('\n'), file: baseName() + '.checks.txt', what: 'Checks' };
+  }
+}
+
+function showTab() {
+  setSeg($('tabs'), state.tab);
+  for (const el of document.querySelectorAll('[data-tab]')) el.hidden = el.dataset.tab !== state.tab;
+  const content = tabContent();
+  $('copy').disabled = $('download').disabled = !content;
+  $('download').title = content ? `Download ${content.file}` : 'Download';
+  const res = state.result;
+  let note = '';
+  if (state.tab === 'react' && state.source) note = `${state.current} · ${state.source.trimEnd().split('\n').length} lines`;
+  if (state.tab === 'zpl' && res) note = `${new Blob([res.zpl]).size.toLocaleString()} bytes · ${res.zpl.trim().split('\n').length} lines`;
+  if (state.tab === 'props') note = editedProps() !== undefined ? 'Edited here · saved in this browser' : 'From PreviewProps' + (currentVariant() ? ` + "${currentVariant()}"` : '');
+  if (state.tab === 'checks') note = res ? `${checksList().filter((c) => c.kind === 'warn').length} warnings` : '';
+  $('bytes').textContent = note;
+  renderInfo();
+}
+
+function renderInfo() {
+  const info = $('info');
+  let html = '';
+  const res = state.result;
+  if (state.tab === 'props') {
+    html = state.propsError
+      ? `<span class="err">${escapeHtml(state.propsError)}</span>`
+      : `Edit the JSON to try other data. ${editedProps() !== undefined ? '<button class="btn" id="resetProps">Reset</button>' : 'Values come from <code>PreviewProps</code>.'}`;
+  } else if (state.tab === 'zpl' && res?.template) {
+    const t = res.template;
+    html = `Template with ${t.fields.length} <code>{{field}}</code> placeholder${t.fields.length === 1 ? '' : 's'}. Fill them in before printing.`;
+    if (t.kept.length) html += ` Kept sample value for ${t.kept.map((k) => `<code>${escapeHtml(k)}</code>`).join(', ')}.`;
+  }
+  info.hidden = !html;
+  info.innerHTML = html;
+  $('resetProps')?.addEventListener('click', resetProps);
+}
+
+function checksList() {
+  const res = state.result;
+  if (!res) return [];
+  const list = [...res.warnings, ...res.previewWarnings].map((text) => ({ kind: 'warn', text }));
+  if (res.template?.kept.length) {
+    list.push({ kind: 'info', text: `Template: kept sample values for ${res.template.kept.join(', ')}`, hint: 'The label could not render with a placeholder there, for example a barcode that only takes digits.' });
+  }
+  if (res.template) {
+    list.push({ kind: 'info', text: 'Template layout uses placeholder text', hint: 'Line breaks and sizes are worked out for the {{field}} text, not the values you fill in later. Check long values with real data.' });
+  }
+  return list;
+}
+
+function renderChecks() {
+  const list = checksList();
+  const warns = list.filter((c) => c.kind === 'warn').length;
+  $('checkCount').hidden = !warns;
+  $('checkCount').textContent = warns;
+  const items = warns ? list : [{ kind: 'ok', text: 'No problems found', hint: 'Everything fits on the label and inside the printable area, and every class is supported.' }, ...list];
+  const icon = { warn: '!', ok: '✓', info: 'i' };
+  $('checks').innerHTML = state.result
+    ? items.map((c) => `<li class="${c.kind}"><span class="icon">${icon[c.kind]}</span><span>${escapeHtml(c.text)}${c.hint ? `<small>${escapeHtml(c.hint)}</small>` : ''}</span></li>`).join('')
+    : '<li class="info"><span class="icon">i</span><span>Fix the render error to run checks.</span></li>';
+}
+
+/* ---------- rendering ---------- */
+async function loadLabels() {
+  state.labels = await (await fetch('/api/labels')).json();
+  const fromHash = decodeURIComponent(location.hash.slice(1));
+  if (!state.labels.some((l) => l.id === state.current)) {
+    state.current = state.labels.some((l) => l.id === fromHash) ? fromHash : state.labels[0]?.id ?? null;
+  }
+  renderList();
+}
+
+let renderSeq = 0;
+async function renderCurrent() {
+  if (!state.current) {
+    showPlaceholder('Add a <code>.tsx</code> file to your labels folder that default-exports a component returning <code>&lt;Label&gt;</code>.');
+    return;
+  }
+  const seq = ++renderSeq;
+  const label = state.labels.find((l) => l.id === state.current);
+  $('title').textContent = label ? label.name : state.current;
+  const body = {
+    id: state.current, dpi: state.dpi || undefined, margin: state.margin || undefined,
+    variant: currentVariant() || undefined, props: editedProps(), template: state.template,
+  };
+  let res = await (await fetch('/api/render', { method: 'POST', body: JSON.stringify(body) })).json();
+  if (res.error && /no preview variant/.test(res.error.message)) {
+    // The variant was renamed or removed: fall back to PreviewProps.
+    store.del(variantKey());
+    body.variant = undefined;
+    res = await (await fetch('/api/render', { method: 'POST', body: JSON.stringify(body) })).json();
+  }
+  if (seq !== renderSeq) return; // a newer render started
+  state.source = res.source || '';
+  $('source').innerHTML = highlightTsx(state.source);
+  renderVariants(res);
+  renderMode();
+  if (res.error) {
+    state.result = null;
+    $('meta').textContent = '';
+    $('canvas').innerHTML = `<div class="error"><strong>Could not render this label</strong>${escapeHtml(res.error.message)}<pre>${escapeHtml(res.error.stack || '')}</pre></div>`;
+    $('zpl').textContent = '';
+    renderChecks();
+    showTab();
+    return;
+  }
+  state.result = res;
+  // Keep what the user is typing; otherwise show the props the label rendered with.
+  if (editedProps() === undefined && document.activeElement !== $('props')) {
+    $('props').value = JSON.stringify(res.props, null, 2);
+    state.propsError = '';
+  }
+  const { setup } = res;
+  const inch = (d) => +(d / setup.dpi).toFixed(2);
+  const m = setup.margin;
+  const marginNote = m.top || m.right || m.bottom || m.left
+    ? ` · margin ${[...new Set([m.top, m.right, m.bottom, m.left])].length === 1 ? m.top : `${m.top} ${m.right} ${m.bottom} ${m.left}`} dots`
+    : '';
+  $('meta').textContent = `${inch(setup.width)} × ${inch(setup.height)} in · ${setup.width} × ${setup.height} dots · ${setup.dpi} dpi${marginNote}`;
+  $('zpl').innerHTML = highlight(res.zpl);
+  renderChecks();
+  showTab();
+  drawPaper();
+}
+
+function renderVariants(res) {
+  const variants = res.variants || [];
+  const current = currentVariant();
+  $('variantWrap').hidden = !variants.length;
+  $('variant').innerHTML = `<option value="">PreviewProps</option>` +
+    variants.map((v) => `<option value="${escapeHtml(v)}"${v === current ? ' selected' : ''}>${escapeHtml(v)}</option>`).join('');
+}
+
+function renderMode() {
+  const edited = editedProps() !== undefined;
+  const parts = [];
+  if (state.template) parts.push('Template');
+  if (edited) parts.push('Edited props');
+  $('mode').hidden = !parts.length;
+  $('mode').textContent = parts.join(' · ');
+  $('mode').className = 'chip' + (edited ? ' accent' : '');
+}
+
+function showPlaceholder(html) {
+  $('canvas').innerHTML = `<div class="placeholder">${html}</div>`;
+}
+
+function drawPaper() {
+  const res = state.result;
+  if (!res) return;
+  const { setup } = res;
+  const canvas = $('canvas');
+  let paper = canvas.querySelector('.paper');
+  if (!paper) {
+    canvas.innerHTML = '<div class="paper"></div>';
+    paper = canvas.querySelector('.paper');
+  }
+  const m = setup.margin;
+  const inner = `M${m.left},${m.top}h${setup.width - m.left - m.right}v${setup.height - m.top - m.bottom}h${-(setup.width - m.left - m.right)}z`;
+  const margins = m.top || m.right || m.bottom || m.left
+    ? `<svg class="overlay" viewBox="0 0 ${setup.width} ${setup.height}" preserveAspectRatio="none"><defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#e5484d" fill-opacity="0.08"/><path d="M0,0v8" stroke="#e5484d" stroke-opacity="0.35" stroke-width="2"/></pattern></defs><path d="M0,0h${setup.width}v${setup.height}h${-setup.width}z${inner}" fill="url(#hatch)" fill-rule="evenodd"><title>Unprintable margin</title></path><path d="${inner}" fill="none" stroke="#e5484d" stroke-opacity="0.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/></svg>`
+    : '';
+  const overlay = state.boxes
+    ? `<svg class="overlay" viewBox="0 0 ${setup.width} ${setup.height}" preserveAspectRatio="none">${res.boxes
+        .map((b) => `<rect x="${b.x}" y="${b.y}" width="${b.width}" height="${b.height}" fill="none" stroke="#e5484d" stroke-width="1" vector-effect="non-scaling-stroke"><title>${b.type} ${b.width}×${b.height}</title></rect>`)
+        .join('')}</svg>`
+    : '';
+  paper.innerHTML = res.svg + margins + overlay;
+  const physical = { w: (setup.width / setup.dpi) * 96, h: (setup.height / setup.dpi) * 96 };
+  let scale;
+  if (state.zoom === 'fit') {
+    const pad = 64;
+    scale = Math.min((canvas.clientWidth - pad) / physical.w, (canvas.clientHeight - pad) / physical.h, 3);
+  } else {
+    scale = Number(state.zoom);
+  }
+  paper.style.width = `${physical.w * scale}px`;
+  paper.style.height = `${physical.h * scale}px`;
+}
+
+function select(id) {
+  state.current = id;
+  state.propsError = '';
+  const edits = editedProps();
+  if (edits !== undefined) $('props').value = JSON.stringify(edits, null, 2);
+  else $('props').value = '';
+  renderList();
+  renderCurrent();
+}
+
+/* ---------- props editor ---------- */
+let propsTimer;
+$('props').addEventListener('input', () => {
+  clearTimeout(propsTimer);
+  propsTimer = setTimeout(() => {
+    let value;
+    try {
+      value = JSON.parse($('props').value);
+    } catch (err) {
+      state.propsError = 'Not valid JSON yet: ' + err.message;
+      renderInfo();
+      return;
+    }
+    state.propsError = '';
+    store.set(editsKey(), JSON.stringify(value));
+    renderCurrent();
+  }, 250);
+});
+$('props').addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    document.execCommand('insertText', false, '  ');
+  }
+});
+function resetProps() {
+  store.del(editsKey());
+  state.propsError = '';
+  $('props').value = '';
+  $('props').blur();
+  toast('Props reset');
+  renderCurrent();
+}
+
+$('variant').addEventListener('change', (e) => {
+  if (e.target.value) store.set(variantKey(), e.target.value);
+  else store.del(variantKey());
+  select(state.current);
+});
+$('template').checked = state.template;
+$('template').addEventListener('change', (e) => {
+  state.template = e.target.checked;
+  store.set('template', state.template ? '1' : '0');
+  renderCurrent();
+});
+
+/* ---------- controls ---------- */
+window.addEventListener('hashchange', () => {
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (id && id !== state.current) select(id);
+});
+window.addEventListener('resize', () => state.zoom === 'fit' && drawPaper());
+$('filter').addEventListener('input', renderList);
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, textarea, select') || !state.labels.length) return;
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  // Follow the sidebar's order (folders first, filtered).
+  const links = [...$('list').querySelectorAll('a')].filter((a) => a.offsetParent !== null);
+  if (!links.length) return;
+  const i = links.findIndex((a) => a.getAttribute('aria-current') === 'true');
+  const next = links[(i + (e.key === 'ArrowDown' ? 1 : -1) + links.length) % links.length];
+  location.hash = next.getAttribute('href').slice(1);
+});
+
+$('dpi').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  state.dpi = b.dataset.v;
+  store.set('dpi', state.dpi);
+  setSeg($('dpi'), state.dpi);
+  renderCurrent();
+});
+$('zoom').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  state.zoom = b.dataset.v;
+  store.set('zoom', state.zoom);
+  setSeg($('zoom'), state.zoom);
+  drawPaper();
+});
+$('margin').value = state.margin;
+$('margin').addEventListener('change', (e) => {
+  state.margin = e.target.value.trim();
+  store.set('margin', state.margin);
+  renderCurrent();
+});
+$('boxes').checked = state.boxes;
+$('boxes').addEventListener('change', (e) => {
+  state.boxes = e.target.checked;
+  store.set('boxes', state.boxes ? '1' : '0');
+  drawPaper();
+});
+
+$('tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  state.tab = b.dataset.v;
+  store.set('tab', state.tab);
+  showTab();
+});
+$('copy').addEventListener('click', async () => {
+  const c = tabContent();
+  if (!c) return;
+  await navigator.clipboard.writeText(c.text);
+  toast(`${c.what} copied`);
+});
+$('download').addEventListener('click', () => {
+  const c = tabContent();
+  if (!c) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([c.text], { type: 'text/plain' }));
+  a.download = c.file;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+$('print').addEventListener('click', () => {
+  if (!state.result) return;
+  $('printerHost').value = store.get('printerHost', '');
+  $('printerPort').value = store.get('printerPort', '9100');
+  $('printStatus').textContent = state.result.template ? 'This is a template: placeholders will print as written.' : '';
+  $('printDialog').showModal();
+});
+$('printForm').addEventListener('submit', async (e) => {
+  if (e.submitter?.value !== 'send') return;
+  e.preventDefault();
+  const host = $('printerHost').value.trim();
+  const port = $('printerPort').value.trim() || '9100';
+  store.set('printerHost', host);
+  store.set('printerPort', port);
+  $('printStatus').textContent = 'Sending…';
+  $('sendPrint').disabled = true;
+  try {
+    const res = await (await fetch('/api/print', { method: 'POST', body: JSON.stringify({ host, port, zpl: state.result.zpl }) })).json();
+    if (res.error) throw new Error(res.error);
+    $('printDialog').close();
+    toast(`Sent to ${host}`);
+  } catch (err) {
+    $('printStatus').textContent = err.message;
+  } finally {
+    $('sendPrint').disabled = false;
+  }
+});
+
+setSeg($('dpi'), state.dpi);
+setSeg($('zoom'), state.zoom);
+
+function connect() {
+  const es = new EventSource('/api/events');
+  es.onopen = () => $('live').classList.remove('off');
+  es.onerror = () => $('live').classList.add('off');
+  es.onmessage = async () => {
+    await loadLabels();
+    await renderCurrent();
+  };
+}
+
+(async () => {
+  await loadLabels();
+  select(state.current);
+  connect();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "react-zpl-monorepo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter @caddy-industries/react-zpl build && pnpm --filter @caddy-industries/react-zpl-cli build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "changeset": "changeset",
+    "docs:build": "pnpm --filter @caddy-industries/react-zpl build && pnpm --filter react-zpl-docs build",
+    "docs:preview": "pnpm --filter react-zpl-docs preview"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.0",
+    "typescript": "^5.9.0"
+  }
+}

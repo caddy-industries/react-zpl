@@ -1,0 +1,73 @@
+{
+  "name": "@caddy-industries/react-zpl",
+  "version": "0.1.0",
+  "description": "Build ZPL labels for Zebra printers with React, flexbox and Tailwind classes.",
+  "license": "MIT",
+  "author": "Caddy Industries",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caddy-industries/react-zpl.git",
+    "directory": "packages/react-zpl"
+  },
+  "homepage": "https://github.com/caddy-industries/react-zpl#readme",
+  "bugs": {
+    "url": "https://github.com/caddy-industries/react-zpl/issues"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "zpl",
+    "zebra",
+    "label",
+    "react",
+    "tailwind",
+    "printer",
+    "barcode"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "compare": "tsx scripts/compare-labelary.tsx",
+    "calibrate": "node scripts/calibrate-font0.mjs > src/text/font0-widths.json"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "dependencies": {
+    "bwip-js": "4",
+    "pngjs": "7",
+    "react-reconciler": "0.34.0",
+    "yoga-layout": "3.2.1"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "^26.6.5",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.3.0",
+    "@types/react-reconciler": "^0.34.1",
+    "react": "19.3.1",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

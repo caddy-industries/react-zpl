@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "types": ["node"], "noEmit": true },
+  "include": ["catalog", "content", "site", "build.tsx", "md.ts", "serve.ts"]
+}

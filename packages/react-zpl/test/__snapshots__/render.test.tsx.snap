@@ -1,0 +1,72 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`render > matches snapshot: barcodes 1`] = `
+"^XA
+^CI28
+^PW812
+^LL1218
+^LH0,0
+^PON
+^FO33,33^BY2^BCN,102,N,N,N,A^FDABC-12345^FS
+^FO82,143^A0N,30,30^FDABC-12345^FS
+^FO33,207^BY2,3.0^B3N,N,63,N,N^FDCODE39^FS
+^FO113,278^A0N,30,30^FDCODE39^FS
+^FO34,343^BY2^BEN,102,N,N^FD400638133393^FS
+^FO35,466^A0N,30,30^FD4006381333931^FS
+^FO274,343^BY2^BUN,102,N,N,N^FD03600029145^FS
+^FO283,466^A0N,30,30^FD036000291452^FS
+^FO34,519^BQN,2,4^FDMA,https://example.com/track/1Z999AA10123456784^FS
+^FO200,589^BXN,4,200^FDABC123456789^FS
+^FO307,603^BY2^B7N,6,2,3^FDPDF417 SAMPLE DATA^FS
+^XZ
+"
+`;
+
+exports[`render > matches snapshot: rotation 1`] = `
+"^XA
+^CI28
+^PW609
+^LL609
+^LH0,0
+^PON
+^FO35,33^A0R,51,51^FDRotated 90^FS
+^FO123,35^A0I,51,51^FDRotated 180^FS
+^FO405,33^A0B,51,51^FDRotated 270^FS
+^XZ
+"
+`;
+
+exports[`render > matches snapshot: shapes 1`] = `
+"^XA
+^CI28
+^PW812
+^LL406
+^LH0,0
+^PON
+^FO34,34^GB222,338,8,B,2^FS
+^FO289,34^GB203,203,203,B,8^FS
+^FO526,34^GB9,338,9,B,0^FS
+^FO568,34^GB210,17,17,B,0^FS
+^FO568,34^GB4,338,4,B,0^FS
+^XZ
+"
+`;
+
+exports[`render > matches snapshot: text 1`] = `
+"^XA
+^CI28
+^PW812
+^LL609
+^LH0,0
+^PON
+^FO33,36^A0N,63,63^FDHello World^FS
+^FO33,121^A0N,30,30^FDThe quick brown fox jumps over the lazy dog. Pack my box^FS
+^FO33,154^A0N,30,30^FDwith five dozen liquor jugs. 0123456789^FS
+^FO34,203^GB182,64,64,B,0^FS
+^FO51,213^A0N,42,42^FR^FDFRAGILE^FS
+^FO231,213^A0N,42,42^FDHANDLE WITH CARE^FS
+^FO33,282^GB746,99,4,B,0^FS
+^FO315,306^A0N,51,51^FDCentered^FS
+^XZ
+"
+`;

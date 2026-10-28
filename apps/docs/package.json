@@ -1,0 +1,21 @@
+{
+  "name": "react-zpl-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsx build.tsx",
+    "preview": "tsx serve.ts",
+    "dev": "tsx build.tsx && tsx serve.ts",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "@caddy-industries/react-zpl": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.2.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.0"
+  }
+}

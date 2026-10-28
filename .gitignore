@@ -1,0 +1,8 @@
+node_modules
+dist
+out
+compare-out
+*.log
+.DS_Store
+.env
+.env.*

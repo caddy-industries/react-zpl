@@ -1,0 +1,20 @@
+{
+  "name": "example-shipping-label",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "react-zpl dev",
+    "export": "react-zpl export --svg",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "@caddy-industries/react-zpl": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.2.0",
+    "@caddy-industries/react-zpl-cli": "workspace:*",
+    "typescript": "^5.9.0"
+  }
+}
