@@ -1,4 +1,4 @@
-import { PNG } from 'pngjs';
+import { decodeBase64, readPng } from './png';
 
 export interface Grayscale {
   width: number;
@@ -11,7 +11,7 @@ function toBytes(src: Uint8Array | ArrayBuffer | string): Uint8Array {
   if (typeof src === 'string') {
     const m = /^data:image\/png;base64,(.+)$/i.exec(src);
     if (!m) throw new Error('react-zpl: <Image src> must be PNG bytes or a data:image/png;base64 URL');
-    return Uint8Array.from(Buffer.from(m[1], 'base64'));
+    return decodeBase64(m[1]);
   }
   return src instanceof Uint8Array ? src : new Uint8Array(src);
 }
@@ -22,7 +22,7 @@ const decodedStrings = new Map<string, Grayscale>();
 export function decodePng(src: Uint8Array | ArrayBuffer | string): Grayscale {
   const cached = typeof src === 'string' ? decodedStrings.get(src) : decoded.get(src);
   if (cached) return cached;
-  const png = PNG.sync.read(Buffer.from(toBytes(src)));
+  const png = readPng(toBytes(src));
   const data = new Uint8Array(png.width * png.height);
   for (let i = 0; i < data.length; i++) {
     const r = png.data[i * 4];

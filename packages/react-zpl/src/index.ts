@@ -17,6 +17,7 @@ export {
   Text,
   type TextProps,
 } from './components';
+export { type LayoutEngine, setLayoutEngine } from './layout/yoga';
 export type { DrawOp, LabelSetup, LayoutBox } from './ops';
 export { type PreviewResult, previewZpl, renderToSvg, type SvgOptions } from './preview/svg';
 export { type RenderOptions, type RenderResult, render, renderLabel } from './render';

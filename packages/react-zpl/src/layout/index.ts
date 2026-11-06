@@ -7,11 +7,10 @@ import {
   Gutter,
   Justify,
   MeasureMode,
-  type Node as YogaNode,
   PositionType,
   Wrap,
-  type Yoga,
-} from 'yoga-layout/load';
+} from './yoga-js/enums.js';
+import type { Node as YogaNode, Yoga } from 'yoga-layout/load';
 import { encodeSymbol, type LinearType, linearElementWidths, retailDigits, sum } from '../barcode/encode';
 import { decodePng, toMonochrome } from '../image/bitmap';
 import type { DrawOp, LabelSetup, LayoutBox } from '../ops';
@@ -483,15 +482,18 @@ function build(el: ElementNode, parent: Inherited, ctx: Ctx): LNode {
   return node;
 }
 
-let sharedConfig: ReturnType<Yoga['Config']['create']> | undefined;
+// One config per engine build, since a config only works with the build that made it.
+const configs = new WeakMap<Yoga, ReturnType<Yoga['Config']['create']>>();
 function config(ctx: Ctx) {
-  if (!sharedConfig) {
-    sharedConfig = ctx.yoga.Config.create();
-    sharedConfig.setPointScaleFactor(1);
+  let c = configs.get(ctx.yoga);
+  if (!c) {
+    c = ctx.yoga.Config.create();
+    c.setPointScaleFactor(1);
     // Web defaults: items shrink to fit (flex-shrink: 1), like CSS.
-    sharedConfig.setUseWebDefaults(true);
+    c.setUseWebDefaults(true);
+    configs.set(ctx.yoga, c);
   }
-  return sharedConfig;
+  return c;
 }
 
 function isDark(color: string | undefined): boolean | undefined {

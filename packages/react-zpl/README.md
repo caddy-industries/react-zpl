@@ -108,6 +108,27 @@ Supported Tailwind classes:
 
 Unsupported classes are skipped and reported in the render warnings.
 
+### Without WebAssembly
+
+Yoga normally runs as WebAssembly. Where that isn't available, react-zpl
+switches to a plain JavaScript build of the same Yoga version, so labels lay
+out the same way:
+
+- **React Native:** Metro picks the React Native build automatically, which
+  only contains the JavaScript engine (Hermes has no WebAssembly).
+- **Images:** PNGs are decoded in plain JavaScript with no Node built-ins,
+  so `<Image>` works in React Native too.
+- **Other runtimes:** if WebAssembly is missing or blocked, for example by a
+  Content Security Policy, react-zpl falls back on its own.
+
+To choose the engine yourself, call `setLayoutEngine` before the first render:
+
+```ts
+import { setLayoutEngine } from '@caddy-industries/react-zpl';
+
+setLayoutEngine('js'); // 'auto' (default), 'wasm' or 'js'
+```
+
 ### Units
 
 A bare number is a CSS pixel (1/96 inch), just like on the web. Strings can
