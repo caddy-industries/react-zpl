@@ -14,10 +14,13 @@
     "url": "https://github.com/caddy-industries/react-zpl/issues"
   },
   "type": "module",
+  "main": "./dist/index.js",
+  "react-native": "./dist/index.native.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "react-native": "./dist/index.native.js",
       "default": "./dist/index.js"
     }
   },
@@ -35,19 +38,20 @@
     "barcode"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "compare": "tsx scripts/compare-labelary.tsx",
-    "calibrate": "node scripts/calibrate-font0.mjs > src/text/font0-widths.json"
+    "calibrate": "node scripts/calibrate-font0.mjs > src/text/font0-widths.json",
+    "build:yoga-js": "sh scripts/build-yoga-js.sh"
   },
   "peerDependencies": {
     "react": "^19.0.0"
   },
   "dependencies": {
     "bwip-js": "4",
-    "pngjs": "7",
+    "fflate": "0.8.2",
     "react-reconciler": "0.34.0",
     "yoga-layout": "3.2.1"
   },
@@ -57,6 +61,7 @@
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19.3.0",
     "@types/react-reconciler": "^0.34.1",
+    "pngjs": "7",
     "react": "19.3.1",
     "tsup": "^9.0.0",
     "tsx": "^4.23.15",
