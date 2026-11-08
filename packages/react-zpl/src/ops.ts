@@ -43,6 +43,11 @@ export interface BarcodeOp {
   height: number;
   errorCorrection?: string | number;
   columns?: number;
+  /** Which way the symbol is turned (clockwise): N upright, R 90, I 180, B 270. Default N. */
+  orientation?: 'N' | 'R' | 'I' | 'B';
+  /** Size of the symbol in dots as laid out upright (without any caption). */
+  symbolWidth?: number;
+  symbolHeight?: number;
 }
 
 export interface ImageOp {

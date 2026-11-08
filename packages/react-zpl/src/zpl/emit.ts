@@ -10,6 +10,7 @@ export function fieldData(data: string): string {
 }
 
 function op(o: DrawOp): string {
+  const turned = o.kind === 'barcode' ? (o.orientation ?? 'N') : 'N';
   // QR codes print below their field origin, so move the origin up to compensate.
   const y = o.kind === 'barcode' && o.type === 'qrcode' ? Math.max(0, o.y - QR_TOP_OFFSET) : o.y;
   const fo = `^FO${o.x},${y}`;
@@ -25,19 +26,19 @@ function op(o: DrawOp): string {
     case 'barcode':
       switch (o.type) {
         case 'code128':
-          return `${fo}^BY${o.moduleWidth}^BCN,${o.height},N,N,N,A${fieldData(o.data)}^FS`;
+          return `${fo}^BY${o.moduleWidth}^BC${turned},${o.height},N,N,N,A${fieldData(o.data)}^FS`;
         case 'code39':
-          return `${fo}^BY${o.moduleWidth},${o.ratio.toFixed(1)}^B3N,N,${o.height},N,N${fieldData(o.data)}^FS`;
+          return `${fo}^BY${o.moduleWidth},${o.ratio.toFixed(1)}^B3${turned},N,${o.height},N,N${fieldData(o.data)}^FS`;
         case 'ean13':
-          return `${fo}^BY${o.moduleWidth}^BEN,${o.height},N,N${fieldData(o.data)}^FS`;
+          return `${fo}^BY${o.moduleWidth}^BE${turned},${o.height},N,N${fieldData(o.data)}^FS`;
         case 'upca':
-          return `${fo}^BY${o.moduleWidth}^BUN,${o.height},N,N,N${fieldData(o.data)}^FS`;
+          return `${fo}^BY${o.moduleWidth}^BU${turned},${o.height},N,N,N${fieldData(o.data)}^FS`;
         case 'qrcode':
           return `${fo}^BQN,2,${o.moduleWidth}${fieldData(`${o.errorCorrection ?? 'M'}A,${o.data}`)}^FS`;
         case 'datamatrix':
-          return `${fo}^BXN,${o.moduleWidth},200${fieldData(o.data)}^FS`;
+          return `${fo}^BX${turned},${o.moduleWidth},200${fieldData(o.data)}^FS`;
         case 'pdf417':
-          return `${fo}^BY${o.moduleWidth}^B7N,${o.height},${o.errorCorrection ?? 2},${o.columns ?? 4}${fieldData(o.data)}^FS`;
+          return `${fo}^BY${o.moduleWidth}^B7${turned},${o.height},${o.errorCorrection ?? 2},${o.columns ?? 4}${fieldData(o.data)}^FS`;
       }
   }
 }

@@ -20,6 +20,7 @@ import type { Style } from '../style/types';
 import { measureText, transformText, wrapText } from '../text/font0';
 import { dpmmFor, type Length, parseLength, toDots } from '../units';
 import { QR_TOP_OFFSET, RETAIL_GUARD_EXTENSION } from '../zpl/quirks';
+import { type Rotation, turnBox, turnMargin, turnOp } from './rotate';
 import { getYoga } from './yoga';
 
 export interface LayoutOptions {
@@ -585,7 +586,13 @@ function emitNode(node: LNode, ox: number, oy: number, ctx: Ctx, ops: DrawOp[], 
   if (node.barcode) {
     const bc = node.barcode;
     const bx = cx + alignOffset(bc.width, cw);
-    ops.push({ ...bc.op, x: bx + Math.round((bc.width - bc.symbolWidth) / 2), y: cy });
+    ops.push({
+      ...bc.op,
+      symbolWidth: bc.symbolWidth,
+      symbolHeight: bc.symbolHeight,
+      x: bx + Math.round((bc.width - bc.symbolWidth) / 2),
+      y: cy,
+    });
     if (bc.caption) {
       const tw = measureText(bc.caption.text, bc.caption.fontHeight);
       ops.push({
@@ -673,6 +680,10 @@ export async function layout(tree: TreeNode[], opts: LayoutOptions = {}): Promis
   const width = Math.floor(ctx.dots(opts.width ?? label.props.width) + 0.01);
   const height = Math.floor(ctx.dots(opts.height ?? label.props.height) + 0.01);
   if (!(width > 0 && height > 0)) throw new Error('react-zpl: <Label> needs a width and height.');
+  // Width and height are as the label is read; a turned label is laid out that
+  // way and every element is turned for the stock at the end.
+  const rotate: Rotation = label.props.rotate ?? 0;
+  if (![0, 90, 180, 270].includes(rotate)) throw new Error('react-zpl: <Label rotate> must be 0, 90, 180 or 270.');
 
   // Lay the label out inside the printable area so nothing lands in the margins.
   const [mt, mr, mb, ml] = edges(opts.printMargin ?? label.props.printMargin).map((v) =>
@@ -722,10 +733,21 @@ export async function layout(tree: TreeNode[], opts: LayoutOptions = {}): Promis
   }
 
   const p = label.props;
+  const side = rotate === 90 || rotate === 270;
   return {
-    setup: { width, height, dpmm, dpi, margin, quantity: p.quantity, darkness: p.darkness, speed: p.speed, inverted: p.inverted },
-    ops,
-    boxes,
+    setup: {
+      width: side ? height : width,
+      height: side ? width : height,
+      dpmm,
+      dpi,
+      margin: turnMargin(margin, rotate),
+      quantity: p.quantity,
+      darkness: p.darkness,
+      speed: p.speed,
+      inverted: p.inverted,
+    },
+    ops: ops.map((o) => turnOp(o, rotate, width, height)),
+    boxes: boxes.map((b) => turnBox(b, rotate, width, height)),
     warnings: [...ctx.warnings],
   };
 }

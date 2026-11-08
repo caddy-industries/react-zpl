@@ -124,10 +124,19 @@ export function previewZpl(zpl: string, options: SvgOptions = {}): PreviewResult
   });
   let s = fresh();
 
-  const fill = (d: string, white: boolean, reverse: boolean) => {
+  const fill = (d: string, white: boolean, reverse: boolean, transform?: string) => {
     if (!d) return;
-    if (reverse) shapes.push(`<path d="${d}" fill="#fff" fill-rule="evenodd" style="mix-blend-mode:difference"/>`);
-    else shapes.push(`<path d="${d}" fill="${white ? '#fff' : '#000'}" fill-rule="evenodd"/>`);
+    const t = transform ? ` transform="${transform}"` : '';
+    if (reverse) shapes.push(`<path${t} d="${d}" fill="#fff" fill-rule="evenodd" style="mix-blend-mode:difference"/>`);
+    else shapes.push(`<path${t} d="${d}" fill="${white ? '#fff' : '#000'}" fill-rule="evenodd"/>`);
+  };
+
+  // A symbol drawn upright at 0,0 (w × h), placed at x,y turned clockwise like ^A text.
+  const turned = (o: string, x: number, y: number, w: number, h: number) => {
+    if (o === 'R') return `translate(${x + h},${y}) rotate(90)`;
+    if (o === 'I') return `translate(${x + w},${y + h}) rotate(180)`;
+    if (o === 'B') return `translate(${x},${y + w}) rotate(270)`;
+    return undefined;
   };
 
   const drawText = (text: string, x: number, y: number, o: string, h: number, w: number, reverse: boolean) => {
@@ -177,6 +186,16 @@ export function previewZpl(zpl: string, options: SvgOptions = {}): PreviewResult
   const fieldBarcode = (cmd: string, p: string[], data: string) => {
     const mw = s.by.w;
     let { x, y } = s;
+    // ^BQ is always upright; the others take an orientation first.
+    const o = cmd === 'BQ' ? 'N' : (p[0] || 'N').trim().toUpperCase() || 'N';
+    const upright = o === 'N';
+    // Turned symbols are drawn at 0,0 and moved into place.
+    const ox = upright ? 0 : x;
+    const oy = upright ? 0 : y;
+    if (!upright) {
+      x = 0;
+      y = 0;
+    }
     try {
       if (cmd === 'BQ') {
         const mag = num(p[2], 2);
@@ -194,7 +213,12 @@ export function previewZpl(zpl: string, options: SvgOptions = {}): PreviewResult
         const sym = encodeSymbol('datamatrix', data);
         if (sym.kind !== 'matrix') return;
         if (s.typeset) y -= sym.rows * size;
-        fill(matrixRects(sym.cells, sym.cols, sym.rows, x, y, size, size), false, s.reverse);
+        fill(
+          matrixRects(sym.cells, sym.cols, sym.rows, x, y, size, size),
+          false,
+          s.reverse,
+          turned(o, ox, oy, sym.cols * size, sym.rows * size),
+        );
         return;
       }
       if (cmd === 'B7') {
@@ -202,7 +226,12 @@ export function previewZpl(zpl: string, options: SvgOptions = {}): PreviewResult
         const sym = encodeSymbol('pdf417', data, { errorCorrection: num(p[2], 0), columns: num(p[3], 4) });
         if (sym.kind !== 'matrix') return;
         if (s.typeset) y -= sym.rows * rowH;
-        fill(matrixRects(sym.cells, sym.cols, sym.rows, x, y, mw, rowH), false, s.reverse);
+        fill(
+          matrixRects(sym.cells, sym.cols, sym.rows, x, y, mw, rowH),
+          false,
+          s.reverse,
+          turned(o, ox, oy, sym.cols * mw, sym.rows * rowH),
+        );
         return;
       }
       const map: Record<string, LinearType> = { BC: 'code128', B3: 'code39', BE: 'ean13', BU: 'upca' };
@@ -228,7 +257,8 @@ export function previewZpl(zpl: string, options: SvgOptions = {}): PreviewResult
         }
         cx += w;
       });
-      fill(d, false, s.reverse);
+      const symbolH = h + (retail ? RETAIL_GUARD_EXTENSION : 0);
+      fill(d, false, s.reverse, turned(o, ox, oy, cx - x, symbolH));
     } catch (err) {
       warnings.add(err instanceof Error ? err.message : String(err));
     }
