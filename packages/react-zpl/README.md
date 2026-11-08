@@ -75,7 +75,7 @@ what the printer receives. The viewer has:
 
 | Component | What it does |
 | --- | --- |
-| `<Label width height dpi? printMargin? quantity? darkness? speed? inverted?>` | The root. Sets the label size and printer settings. |
+| `<Label width height dpi? printMargin? quantity? darkness? speed? inverted? rotate?>` | The root. Sets the label size and printer settings. |
 | `<Box>` | A flex container, like a `div`. Supports borders, rounded corners and black/white fill. |
 | `<Text maxLines? ellipsis? rotate?>` | Text in the printer's built-in font. Wraps to fit its box. |
 | `<Barcode type value height? moduleWidth? showText? textSize?>` | `code128` (default), `code39`, `ean13`, `upca`, `datamatrix`, `pdf417`. |

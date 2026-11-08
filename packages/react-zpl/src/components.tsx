@@ -30,6 +30,14 @@ export interface LabelProps extends BaseProps {
   speed?: number;
   /** Print the label upside down (^POI). */
   inverted?: boolean;
+  /**
+   * Turn the whole label clockwise on the stock. Width and height stay as the
+   * label is read, so a 5 × 3 in landscape label on 3 × 5 in stock is
+   * `width="5in" height="3in" rotate={90}`: the ZPL is 3 in across the
+   * printhead and every field is turned to match. The print margin is also
+   * given as the label is read. QR codes stay upright (ZPL can't turn them).
+   */
+  rotate?: 0 | 90 | 180 | 270;
   children?: ReactNode;
 }
 
