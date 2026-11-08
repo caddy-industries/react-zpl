@@ -28,7 +28,7 @@
   },
   "peerDependencies": {
     "react": "^19.0.0",
-    "@caddy-industries/react-zpl": "^0.1.0"
+    "@caddy-industries/react-zpl": ">=0.1.0 <1.0.0"
   },
   "engines": {
     "node": ">=20"
