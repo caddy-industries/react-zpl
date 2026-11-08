@@ -90,7 +90,7 @@ importers:
   packages/react-zpl:
     dependencies:
       bwip-js:
-        specifier: '4'
+        specifier: ^4.11.4
         version: 4.11.4
       fflate:
         specifier: 0.8.2
