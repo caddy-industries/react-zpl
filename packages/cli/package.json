@@ -1,6 +1,6 @@
 {
   "name": "@caddy-industries/react-zpl-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Live preview and export for react-zpl labels.",
   "license": "MIT",
   "author": "Caddy Industries",
