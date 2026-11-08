@@ -20,7 +20,7 @@ import type { Style } from '../style/types';
 import { measureText, transformText, wrapText } from '../text/font0';
 import { dpmmFor, type Length, parseLength, toDots } from '../units';
 import { QR_TOP_OFFSET, RETAIL_GUARD_EXTENSION } from '../zpl/quirks';
-import { type Rotation, turnBox, turnMargin, turnOp } from './rotate';
+import { extent, type Rotation, turnBox, turnMargin, turnOp } from './rotate';
 import { getYoga } from './yoga';
 
 export interface LayoutOptions {
@@ -713,9 +713,14 @@ export async function layout(tree: TreeNode[], opts: LayoutOptions = {}): Promis
       ctx.warn(`QR codes print ${QR_TOP_OFFSET} dots below their position, so one this close to the top edge prints lower than shown.`);
     }
   }
-  // Check element boxes against the label and the printable area.
+  // Check element boxes against the label and the printable area. What is
+  // drawn counts too: a barcode can be wider than the box flexbox gave it.
   const hasMargin = margin.top || margin.right || margin.bottom || margin.left;
-  for (const b of boxes) {
+  const drawn: LayoutBox[] = ops.map((o) => {
+    const e = extent(o);
+    return { type: o.kind, x: e.x, y: e.y, width: e.w, height: e.h };
+  });
+  for (const b of [...boxes, ...drawn]) {
     if (b.width <= 0 || b.height <= 0) continue;
     if (b.x < 0 || b.y < 0 || b.x + b.width > width || b.y + b.height > height) {
       ctx.warn('Some content is outside the label and will not print.');
@@ -723,7 +728,7 @@ export async function layout(tree: TreeNode[], opts: LayoutOptions = {}): Promis
     }
   }
   if (hasMargin) {
-    for (const b of boxes) {
+    for (const b of [...boxes, ...drawn]) {
       if (b.width <= 0 || b.height <= 0) continue;
       if (b.x < margin.left || b.y < margin.top || b.x + b.width > width - margin.right || b.y + b.height > height - margin.bottom) {
         ctx.warn('Some content reaches into the unprintable margin and may be cut off.');

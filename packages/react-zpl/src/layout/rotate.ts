@@ -39,7 +39,7 @@ export function turnRect(r: Rect, deg: Rotation, width: number, height: number):
 const UPRIGHT_ONLY = new Set<BarcodeOp['type']>(['qrcode']);
 
 /** The box a draw op covers, in the space it was laid out in. */
-function extent(op: DrawOp): Rect {
+export function extent(op: DrawOp): Rect {
   switch (op.kind) {
     case 'rect':
       return { x: op.x, y: op.y, w: op.w, h: op.h };
