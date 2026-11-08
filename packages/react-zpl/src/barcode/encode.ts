@@ -1,4 +1,6 @@
-import bwip from 'bwip-js';
+// The platform-free build: the package's React Native entry pulls in
+// react-zlib-js (for PNGs we never make), which Metro can't resolve.
+import bwip from 'bwip-js/generic';
 
 export type LinearType = 'code128' | 'code39' | 'ean13' | 'upca';
 export type MatrixType = 'qrcode' | 'datamatrix' | 'pdf417';
