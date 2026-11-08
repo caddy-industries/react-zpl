@@ -204,6 +204,18 @@ describe('print margin', () => {
     expect(r.warnings).toContain('Some content reaches into the unprintable margin and may be cut off.');
   });
 
+  it('warns when a barcode is wider than the room it was given', async () => {
+    const r = await renderLabel(
+      <Label width="400dots" height="200dots">
+        <Box className="flex-row">
+          <Text style={{ width: '200dots' }}>Unit</Text>
+          <Barcode value="hu_k3m9x2p8q1w7e5r4t6y0u2" moduleWidth="2dots" />
+        </Box>
+      </Label>,
+    );
+    expect(r.warnings).toContain('Some content is outside the label and will not print.');
+  });
+
   it('rejects margins that leave no space', async () => {
     await expect(renderLabel(label({ printMargin: '250dots' }))).rejects.toThrow(/no printable area/);
   });
