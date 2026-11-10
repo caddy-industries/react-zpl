@@ -112,4 +112,6 @@ pnpm docs:build                            # build the docs website to apps/docs
 
 ## License
 
-[MIT](LICENSE) © Caddy Industries
+[MIT](LICENSE) © [Caddy Industries](https://caddyindustries.com)
+
+react-zpl is built and sponsored by [Caddy Industries](https://caddyindustries.com).

@@ -197,3 +197,7 @@ previewZpl(zpl, options): { svg, width, height, warnings }
   shorter side. Small radii on large boxes may round down to square corners.
 - White text uses field reverse (`^FR`), so it shows white on black and
   black on white.
+
+## Sponsor
+
+react-zpl is built and sponsored by [Caddy Industries](https://caddyindustries.com).
