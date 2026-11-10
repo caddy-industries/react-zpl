@@ -3,7 +3,14 @@
   "version": "0.1.0",
   "description": "Live preview and export for react-zpl labels.",
   "license": "MIT",
-  "author": "Caddy Industries",
+  "author": {
+    "name": "Caddy Industries",
+    "url": "https://caddyindustries.com"
+  },
+  "funding": {
+    "type": "company",
+    "url": "https://caddyindustries.com"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/caddy-industries/react-zpl.git",

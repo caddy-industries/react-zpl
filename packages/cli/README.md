@@ -8,3 +8,7 @@ npx react-zpl export [--dir labels] [--out out] [--dpi 203] [--margin 1mm] [--sv
 ```
 
 See the [react-zpl README](../react-zpl#preview-while-you-design) for what the viewer does.
+
+## Sponsor
+
+react-zpl is built and sponsored by [Caddy Industries](https://caddyindustries.com).
